@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "@supabase/supabase-js": "2.38.4",
     "framer-motion": "10.16.4",
-    "openai": "latest",
-    "react-dom": "^19.2.0"
+    "openai": "latest"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
