@@ -1,0 +1,5 @@
+{
+  "name": "Odinary Meme Dashboard",
+  "description": "A web dashboard to view memes, track engagement scores, and see the community leaderboard for the Odinary project. It visualizes data from the Odinary Telegram bot, including meme votes, user XP, and token price.",
+  "requestFramePermissions": []
+}
