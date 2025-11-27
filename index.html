@@ -20,42 +20,9 @@
     }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-red': '#E53E3E',
-              'brand-orange': '#ED8936',
-              'brand-cyan': '#22D3EE'
-            },
-            fontFamily: {
-              sans: ['Poppins', 'sans-serif'],
-              header: ['Anton', 'sans-serif'],
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              fadeInOut: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '15%, 85%': { opacity: '1', transform: 'translateY(0)' },
-                '100%': { opacity: '0', transform: 'translateY(-10px)' },
-              }
-            },
-            animation: {
-              'fade-in': 'fadeIn 0.5s ease-out forwards',
-              'fade-in-out': 'fadeInOut 4s ease-in-out forwards',
-            }
-          }
-        }
-      }
-    </script>
-
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800&display=swap');
+
       :root {
         --brand-red: #E53E3E;
         --brand-red-glow: rgba(229, 62, 62, 0.5);
@@ -66,7 +33,10 @@
         --text-primary: #F2F2F2;
         --text-secondary: #A0AEC0;
       }
+
       body {
+        margin: 0;
+        padding: 0;
         background-color: var(--bg-color);
         color: var(--text-primary);
         font-family: 'Poppins', sans-serif;
@@ -75,12 +45,28 @@
           radial-gradient(circle at 80% 90%, rgba(34, 211, 238, 0.08) 0%, transparent 40%);
         background-attachment: fixed;
       }
+
       .glass-effect {
         background-color: rgba(29, 29, 33, 0.6);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid var(--glass-border);
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      }
+
+      /* Basic layout helpers if you want to mimic some Tailwind-y ergonomics */
+      .page-shell {
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+
+      .page-content {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
       }
     </style>
 
