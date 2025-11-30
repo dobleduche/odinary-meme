@@ -230,14 +230,7 @@ export const MemeGenerator: React.FC<MemeGeneratorProps> = ({ onMemeGenerated })
     setSuccessMessage(null);
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload
-
-        if (Math.random() < 0.1) { // Reduced to 10% chance of failure for better production feel
-            throw new Error('Failed to connect to IPFS. Please try again.');
-        }
-
-        // Catch Tainted Canvas errors (CORS issues)
-        let imageUrl;
+        let imageUrl: string;
         try {
             imageUrl = canvas.toDataURL('image/png');
         } catch (e) {
@@ -245,15 +238,25 @@ export const MemeGenerator: React.FC<MemeGeneratorProps> = ({ onMemeGenerated })
             throw new Error("Security Error: Unable to export image. The selected template may not support secure export (CORS). Try a different template.");
         }
 
+        const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+        if (!blob) {
+            throw new Error('Unable to package meme for download. Please try again.');
+        }
+
         const shortHash = createShortHash(topText, bottomText);
         const watermarkText = `ODINARY • ${shortHash}`;
+        const fileName = `odinary-${shortHash.toLowerCase()}.png`;
 
-        // Generate a fake but plausible-looking IPFS CID v0
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let fakeCid = 'Qm';
-        for (let i = 0; i < 44; i++) {
-            fakeCid += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        const downloadUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = downloadUrl;
+        anchor.download = fileName;
+        anchor.rel = 'noopener noreferrer';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(downloadUrl);
 
         const newMeme: Meme = {
             id: `meme-${Date.now()}`,
@@ -264,19 +267,12 @@ export const MemeGenerator: React.FC<MemeGeneratorProps> = ({ onMemeGenerated })
             minted: false,
             prompt: `Template: ${memeTemplates.find(t => t.url === selectedTemplateUrl)?.name || 'Custom'}`,
             watermark: watermarkText,
-            ipfsCid: fakeCid,
         };
-        
+
         onMemeGenerated(newMeme);
 
-        const ipfsGatewayUrl = `https://ipfs.io/ipfs/${fakeCid}`;
         setSuccessMessage(
-            <>
-                Meme created!{' '}
-                <a href={ipfsGatewayUrl} target="_blank" rel="noopener noreferrer" className="underline font-bold hover:text-white">
-                    View on IPFS
-                </a>
-            </>
+            <>Saved <span className="font-semibold">{fileName}</span> locally and added it to your feed.</>
         );
         setTimeout(() => setSuccessMessage(null), 4000);
 
@@ -377,7 +373,7 @@ export const MemeGenerator: React.FC<MemeGeneratorProps> = ({ onMemeGenerated })
                       <LoaderIcon className="w-5 h-5 animate-spin mr-2" />
                       Saving...
                     </>
-                  ) : 'Export to IPFS'}
+                  ) : 'Download Meme'}
                 </button>
                 <button 
                   onClick={handleRandomizeTemplate}
@@ -405,7 +401,7 @@ export const MemeGenerator: React.FC<MemeGeneratorProps> = ({ onMemeGenerated })
                     </div>
                 )}
             </div>
-            <p className="text-xs text-gray-500 text-center -mt-2">Export simulates a download. Sharing opens a pre-filled tweet.</p>
+            <p className="text-xs text-gray-500 text-center -mt-2">Downloading saves a PNG locally. Sharing opens a pre-filled tweet.</p>
         </div>
       </div>
     </div>
