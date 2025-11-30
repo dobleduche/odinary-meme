@@ -1,44 +1,29 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "module": "ESNext",
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
-
-    "jsx": "react-jsx",
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "isolatedModules": true,
-    "allowJs": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
     "skipLibCheck": true,
-
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-
     "types": [
       "node"
     ],
-
-    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
-        "src/*"
+        "./*"
       ]
-    }
-  },
-  "include": [
-    "src",
-    "vite-env.d.ts"
-  ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
 }

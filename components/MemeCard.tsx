@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// FIX: Import Variants type from framer-motion to correctly type animation variants.
+import { motion, Variants } from 'framer-motion';
 import { Meme } from '../types';
 import { UpvoteIcon, XIcon, NftIcon, ShareIcon, TrashIcon, TelegramIcon, MagicWandIcon, LoaderIcon } from './Icons';
 
@@ -10,7 +11,8 @@ interface MemeCardProps {
   onMint: (id: string) => Promise<void>;
 }
 
-const cardVariants = {
+// FIX: Explicitly type cardVariants with Variants to fix type inference issue.
+const cardVariants: Variants = {
   hidden: { y: 20, opacity: 0, scale: 0.95 },
   visible: {
     y: 0,

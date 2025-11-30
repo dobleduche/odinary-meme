@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+// FIX: Import Variants type from framer-motion to correctly type animation variants.
+import { motion, Variants } from 'framer-motion';
 import { Meme, Comment } from '../types';
 import { CloseIcon, NftIcon, UpvoteIcon, XIcon, TelegramIcon, SendIcon, ShareIcon, LoaderIcon } from './Icons';
 
@@ -18,12 +19,14 @@ const DetailStat = ({ icon, value, label }: { icon: React.ReactNode; value: stri
     </div>
 );
 
-const backdropVariants = {
+// FIX: Explicitly type backdropVariants with Variants for type safety.
+const backdropVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
 
-const modalVariants = {
+// FIX: Explicitly type modalVariants with Variants to fix type inference issue.
+const modalVariants: Variants = {
   hidden: { y: "50px", scale: 0.9, opacity: 0 },
   visible: { 
     y: 0, 
