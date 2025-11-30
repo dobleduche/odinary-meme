@@ -8,16 +8,8 @@ import { MemeDetailModal } from './components/MemeDetailModal';
 import { MenuIcon, CheckIcon } from './components/Icons';
 import { FeedFilters } from './components/FeedFilters';
 import { Pagination } from './components/Pagination';
-
-// Mock data to replace backend fetching for now
-const mockMemes: Meme[] = [
-  { id: '1', imageUrl: 'https://i.imgur.com/xIu2f0M.jpeg', caption: 'Investors waiting for the bull run like it\'s DoorDash delivery', score: 1337, minted: true, shareCount: 256, prompt: 'investors waiting for bull run' },
-  { id: '2', imageUrl: 'https://i.imgur.com/sIqjGzN.jpeg', caption: 'When history books talk about meme coins, make sure your wallet whispers \'$NARY.\'', score: 987, minted: true, shareCount: 128, prompt: 'history of meme coins' },
-  { id: '3', imageUrl: 'https://i.imgur.com/Ufhm420.jpeg', caption: 'SEIZE THE MEMES OF PRODUCTION', score: 850, minted: false, shareCount: 64, prompt: 'revolution meme' },
-  { id: '4', imageUrl: 'https://i.imgur.com/j19E1zT.jpeg', caption: 'PUT DOWN THE PHONE IT CAN WAIT', score: 720, minted: false, shareCount: 32, prompt: 'a person relaxing in a field' },
-];
-
-const initialPrice: PriceData = { usd: 0.0042, usd_24h_change: 12.75 };
+import { fetchTokenPrice, FALLBACK_PRICE } from './services/api';
+import { loadMemes, persistMemes, seedMemes } from './services/memeStorage';
 
 type View = 'create' | 'feed' | 'dfs' | 'tokens' | 'market' | 'proof' | 'docs';
 type FilterStatus = 'all' | 'minted' | 'not_minted';
@@ -41,7 +33,9 @@ const NavItem = ({ label, active, onClick, disabled = false }: { label: string, 
 
 const App: React.FC = () => {
   const [memes, setMemes] = useState<Meme[]>([]);
-  const [price, setPrice] = useState<PriceData | null>(null);
+  const [price, setPrice] = useState<PriceData | null>(FALLBACK_PRICE);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [priceLoading, setPriceLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
@@ -57,44 +51,42 @@ const App: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortBy>('newest');
 
   useEffect(() => {
-    // Simulate fetching data, now with localStorage persistence
     setLoading(true);
     setError(null);
-    setTimeout(() => {
-      try {
-        const storedMemes = localStorage.getItem('odinary_memes');
-        if (storedMemes) {
-          const parsed = JSON.parse(storedMemes);
-          if (Array.isArray(parsed)) {
-            setMemes(parsed);
-          } else {
-             // Fallback if data is corrupted
-             const sortedMock = mockMemes.sort((a,b) => parseInt(b.id) - parseInt(a.id));
-             setMemes(sortedMock);
-          }
-        } else {
-          // Fallback to mock data if nothing in storage
-          const sortedMock = mockMemes.sort((a,b) => parseInt(b.id) - parseInt(a.id));
-          setMemes(sortedMock);
-        }
-      } catch (e) {
-        console.error("Failed to load memes from localStorage", e);
-        const sortedMock = mockMemes.sort((a,b) => parseInt(b.id) - parseInt(a.id));
-        setMemes(sortedMock);
-      }
-      setPrice(initialPrice);
+
+    try {
+      const storedMemes = loadMemes();
+      setMemes(storedMemes);
+    } catch (e) {
+      console.error('Failed to load memes', e);
+      setError('Unable to load memes from storage. Showing seeded examples.');
+      setMemes(seedMemes);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setPriceLoading(true);
+    setPriceError(null);
+
+    fetchTokenPrice(controller.signal)
+      .then(setPrice)
+      .catch((err) => {
+        console.error('Failed to fetch live price', err);
+        setPrice(FALLBACK_PRICE);
+        setPriceError('Unable to refresh live price. Showing fallback value.');
+      })
+      .finally(() => setPriceLoading(false));
+
+    return () => controller.abort();
   }, []);
 
   // Save memes to localStorage whenever they change
   useEffect(() => {
     if (!loading) {
-      try {
-        localStorage.setItem('odinary_memes', JSON.stringify(memes));
-      } catch (e) {
-        console.error("Failed to save memes to localStorage", e);
-      }
+      persistMemes(memes);
     }
   }, [memes, loading]);
 
@@ -308,7 +300,12 @@ const App: React.FC = () => {
           </nav>
           
           <div className="flex items-center">
-            <PriceTicker price={price} loading={price === null} />
+            <div className="flex flex-col items-end gap-1">
+              <PriceTicker price={price} loading={priceLoading} />
+              {priceError && (
+                <p className="text-xs text-amber-300 max-w-xs text-right">{priceError}</p>
+              )}
+            </div>
             <button className="ml-4 sm:hidden text-gray-400 hover:text-white">
                 <MenuIcon className="w-6 h-6" />
             </button>
